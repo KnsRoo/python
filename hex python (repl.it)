@@ -1,0 +1,19 @@
+def convert_base(num, to_base=10, from_base=10):
+    if isinstance(num, str):
+        n = int(num, from_base)
+    else:
+        n = int(num)
+    alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    if n < to_base:
+        return alphabet[n]
+    else:
+        return convert_base(n // to_base, to_base) + alphabet[n % to_base]
+
+print("Insert you'r birthdate in format DD.MM.YYYY")
+dob = input().split('.')
+sum = 0
+for item in dob:
+  item.strip()
+  if (item.isdigit()):
+    sum+=int(item)
+print("8 - "+oct(sum)+"\n16 - "+hex(sum)+"\n32 - "+convert_base(sum, from_base=10, to_base=32))
