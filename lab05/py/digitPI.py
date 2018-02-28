@@ -32,20 +32,6 @@ def pi(eps):
 			break
 	appx.append(4*s)
 
-def intotal(a):
-	h = a//3600
-	m = (a//60)%60
-	s = a%60
-	if m<10:
-		m = str('0'+str(m))
-	else:
-		m = str(m)
-	if s<10:
-		s = str('0' + str(s))
-	else:
-		s = str(s)
-	#print('Общее время выполнения: '+str(h)+' : '+ str(m)+' : '+ str(round(s)))
-
 def start(x1,x2, pg):
 	global appx
 	total = 0
@@ -62,10 +48,9 @@ def start(x1,x2, pg):
 			a = a[0:9]; b = b[0:9]
 			if (a == b):
 				results[i][3] = "Да"
-	#print('Программа завершена. Результат:')
 	for i in range(len(results)):
 		if i > 0:
-			c = results[i][2] #c = c[0:len(c)-3]
+			c = results[i][2]
 			total+=c
 		for j in range(len(results[i])):
 			print(results[i][j], end=' ')
