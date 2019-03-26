@@ -2,6 +2,7 @@ import numpy as np
 import itertools
 import random
 
+
 def shuffle(matrix):
 	np.random.shuffle(matrix)
 	for i in range(len(matrix)):
@@ -35,11 +36,11 @@ def interval(y, ost = 0):
     	ost = P[i]
     return P
 
-def cross(dad, mom, child = []):
+def cross(dad, mom, child = [], variant = 0):
 	child = np.zeros((4, 4))
 	for i in range(len(dad)):
 		dad_p, mom_p = np.where(dad[i] == 1)[0][0], np.where(mom[i] == 1)[0][0]
-		j = min(dad_p, mom_p + random.randint(0, abs(dad_p-mom_p)))
+		j = int(round((dad_p+mom_p)/2)) if variant == 0 else min(dad_p, mom_p + random.randint(0, abs(dad_p-mom_p)))
 		child[i,j] = 1
 	if checkshift(child): mutation(child)
 	return np.array(child)
@@ -57,18 +58,16 @@ def rnd_poses(P, nums= [], k = 0, ):
     	else: k+=1
     return nums
 
-def evolution(y, population):
+def evolution(y, population, var = 0):
     P = interval(y[0])
     nums = rnd_poses(P)
     best = [pop[idx] for idx in nums]
     best = list(itertools.product(best,best))
     newpop = [best[idx] for idx in random_pos()]
-    return [cross(*item) for item in newpop]
+    return [cross(*item, variant = var) for item in newpop]
 
 def loginfo(y, y0):
 	print('Приспособленность популяции', y0)
-	print('Популяция', y)
-	print('Ответ', max(y))
 
 if __name__ == "__main__":
     A = np.array([[100, 150, 90, 200],
@@ -76,12 +75,12 @@ if __name__ == "__main__":
          [250, 80,  70, 100],
          [190, 100, 120, 200]])
     pop = [shuffle(np.identity(4)) for i in range(4)]
-    Y = ability(A, pop)
-    Y_pred = 0
+    Y, Y_prev = ability(A, pop), 0
     loginfo(*Y)
     while(True):
-    	pop = evolution(Y, pop)
+    	pop = evolution(Y, pop, 0)
     	Y = ability(A, pop)
-    	if abs(Y[1]-Y_pred)<= 0: break
-    	Y_pred = Y[1]
+    	if abs(Y[1] - Y_prev) <= 0: break
+    	Y_prev = Y[1]
     loginfo(*Y)
+    print('Решение', max(Y[0]))
