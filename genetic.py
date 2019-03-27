@@ -59,8 +59,8 @@ if __name__ == "__main__":
          [190, 100, 120, 200]])
     results = []
     bar = progressbar.ProgressBar().start()
-    for i in range(10):
-      bar.update(i)
+    for i in range(200):
+      bar.update(i%100)
       pop = [shuffle(np.identity(4)) for i in range(4)]
       Y, Y_prev = ability(A, pop), 0
       while(True):
