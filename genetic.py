@@ -1,14 +1,14 @@
 import numpy as np, itertools, collections as col
 from random import randint as rint
 
-def shuffle(matrix):
+def shuffle(matrix) -> 'Генерация начальной популяции': 
     np.random.shuffle(matrix)
     return matrix if not wrong(matrix) else shuffle(matrix)
 
-def rand_vector(indexes):
+def rand_vector(indexes) -> 'Выбор 4 случайных чисел':
     return indexes if len(set(indexes)) == 4 else rand_vector([rint(0,15) for i in range(4)])
 
-def mutation(child, pos = 0, null = 0):
+def mutation(child, pos = 0, null = 0) -> 'Случайная перестановка гена':
     while wrong(child):
         for x in range(len(child)):
             if sum(child.T[x]) > 1: pos = x
@@ -17,21 +17,21 @@ def mutation(child, pos = 0, null = 0):
         child[i, pos], child[i, null]  = 0, 1
     return child
 
-def wrong(child):
+def wrong(child) -> 'Проверка на правильность генов':
 	return sum([1 if (sum(child[i]) != 1 or sum(child.T[i]) != 1) else 0 for i in range(len(child))])
 
-def cross(dad, mom, child, variant = 0):
+def cross(dad, mom, child, variant = 0) -> 'Оператор кроссовера(2 варианта)':
     for i in range(len(dad)):
     	dad_p, mom_p = np.where(dad[i] == 1)[0][0], np.where(mom[i] == 1)[0][0]
     	j = int(round((dad_p+mom_p)/2)) if variant == 0 else min(dad_p, mom_p + rint(0, abs(dad_p-mom_p)))
     	child[i,j] = 1
     return np.array(child) if not wrong(child) else mutation(child)
 
-def ability(A, pop):
+def ability(A, pop) -> 'Функция пр-ти и ср. пр-ть':
     y = [sum((np.multiply(A,item)).ravel()) for item in pop]
     return (y, sum(y)/len(y))
 
-def rand_poses(P, k = 0):
+def rand_poses(P: 'Интервал', k = 0) -> 'Проверка попадания в интервалы':
     M, nums = list(P), []
     P.extend([rint(0,99) for i in range(4)])
     for item in sorted(P):
@@ -39,7 +39,7 @@ def rand_poses(P, k = 0):
     	else: k+=1
     return nums
 
-def evolution(y, pop, var = 0):
+def evolution(y, pop, var = 0) -> 'Шаг развития популяции':
     nums = rand_poses(list(np.cumsum([x/sum(y)*100 for x in y])))
     best = list(itertools.product([pop[idx] for idx in nums], repeat = 2))
     return [cross(*item, np.zeros((4, 4)), variant = var) for item in [best[idx] for idx in rand_vector([rint(0,15) for i in range(4)])]]
