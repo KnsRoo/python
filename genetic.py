@@ -25,10 +25,7 @@ def random_pos(indexes = []):
     	if not idx in indexes: indexes.append(idx)
     return indexes
 
-def interval(y):
-    return list(np.cumsum([x/sum(y)*100 for x in y]))
-
-def cross(dad, mom, child = [], variant = 0):
+def cross(dad, mom, variant = 0):
 	child = np.zeros((4, 4))
 	for i in range(len(dad)):
 		dad_p, mom_p = np.where(dad[i] == 1)[0][0], np.where(mom[i] == 1)[0][0]
@@ -41,8 +38,8 @@ def ability(A, population):
     y = [sum((np.multiply(A,item)).ravel()) for item in population]
     return (y, sum(y)/len(y))
 
-def rnd_poses(P, nums= [], k = 0):
-    M = list(P)
+def rnd_poses(P, k = 0):
+    M, nums = list(P), []
     P.extend([np.random.randint(0,99) for i in range(4)])
     for item in sorted(P):
     	if item != M[k]: nums.append(k)
@@ -50,7 +47,7 @@ def rnd_poses(P, nums= [], k = 0):
     return nums
 
 def evolution(y, population, var = 0):
-    nums = rnd_poses(interval(y[0]))
+    nums = rnd_poses(list(np.cumsum([x/sum(y)*100 for x in y])))
     best = list(itertools.product([pop[idx] for idx in nums], repeat = 2))
     newpop = [best[idx] for idx in random_pos()]
     return [cross(*item, variant = var) for item in newpop]
@@ -62,12 +59,12 @@ if __name__ == "__main__":
          [190, 100, 120, 200]])
     results = []
     bar = progressbar.ProgressBar().start()
-    for i in range(2):
+    for i in range(10):
       bar.update(i)
       pop = [shuffle(np.identity(4)) for i in range(4)]
       Y, Y_prev = ability(A, pop), 0
       while(True):
-        pop = evolution(Y, pop, 0)
+        pop = evolution(Y[0], pop, 0)
         Y = ability(A, pop)
         if abs(Y[1] - Y_prev) <= 0: break
         Y_prev = Y[1]
