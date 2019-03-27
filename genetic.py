@@ -1,4 +1,4 @@
-import numpy as np, itertools, progressbar
+import numpy as np, itertools
 from collections import Counter
 
 def shuffle(matrix):
@@ -6,27 +6,24 @@ def shuffle(matrix):
 	if wrong(matrix): shuffle(matrix)
 	return matrix
 
-def mutation(child):
+def rand_vector():
+    indexes = [np.random.randint(0,15) for i in range(4)]
+    if len(set(indexes)) < 4: rand_vector()
+    return indexes
+
+def mutation(child, pos = 0, null = 0):
     while wrong(child):
-        pos, null = [], []
         for x in range(len(child)):
-            if sum(child.T[x]) > 1: pos.append(x)
-            if sum(child.T[x]) == 0: null.append(x)
-        i = np.where(child.T[pos[0]] == 1)[0][0]
-        child[i, pos[0]], child[i, null[0]]  = 0,1
+            if sum(child.T[x]) > 1: pos = x
+            if sum(child.T[x]) == 0: null = x
+        i = np.where(child.T[pos] == 1)[0][0]
+        child[i, pos], child[i, null]  = 0, 1
     return child
 
 def wrong(child):
 	return sum([1 if (sum(child[i]) != 1 or sum(child.T[i]) != 1) else 0 for i in range(len(child))])
 
-def random_pos(indexes = []):
-    while len(indexes) != 4:
-    	idx = np.random.randint(0,15)
-    	if not idx in indexes: indexes.append(idx)
-    return indexes
-
-def cross(dad, mom, variant = 0):
-	child = np.zeros((4, 4))
+def cross(dad, mom, child, variant = 0):
 	for i in range(len(dad)):
 		dad_p, mom_p = np.where(dad[i] == 1)[0][0], np.where(mom[i] == 1)[0][0]
 		j = int(round((dad_p+mom_p)/2)) if variant == 0 else min(dad_p, mom_p + np.random.randint(0, abs(dad_p-mom_p)))
@@ -34,11 +31,11 @@ def cross(dad, mom, variant = 0):
 	if wrong(child): mutation(child)
 	return np.array(child)
 
-def ability(A, population):
-    y = [sum((np.multiply(A,item)).ravel()) for item in population]
+def ability(A, pop):
+    y = [sum((np.multiply(A,item)).ravel()) for item in pop]
     return (y, sum(y)/len(y))
 
-def rnd_poses(P, k = 0):
+def rand_poses(P, k = 0):
     M, nums = list(P), []
     P.extend([np.random.randint(0,99) for i in range(4)])
     for item in sorted(P):
@@ -46,11 +43,10 @@ def rnd_poses(P, k = 0):
     	else: k+=1
     return nums
 
-def evolution(y, population, var = 0):
-    nums = rnd_poses(list(np.cumsum([x/sum(y)*100 for x in y])))
+def evolution(y, pop, var = 0):
+    nums = rand_poses(list(np.cumsum([x/sum(y)*100 for x in y])))
     best = list(itertools.product([pop[idx] for idx in nums], repeat = 2))
-    newpop = [best[idx] for idx in random_pos()]
-    return [cross(*item, variant = var) for item in newpop]
+    return [cross(*item, np.zeros((4, 4)), variant = var) for item in [best[idx] for idx in rand_vector()]]
 
 if __name__ == "__main__":
     A = np.array([[100, 150, 90, 200],
@@ -58,9 +54,7 @@ if __name__ == "__main__":
          [250, 80,  70, 100],
          [190, 100, 120, 200]])
     results = []
-    bar = progressbar.ProgressBar().start()
-    for i in range(200):
-      bar.update(i%100)
+    for i in range(20):
       pop = [shuffle(np.identity(4)) for i in range(4)]
       Y, Y_prev = ability(A, pop), 0
       while(True):
@@ -69,6 +63,5 @@ if __name__ == "__main__":
         if abs(Y[1] - Y_prev) <= 0: break
         Y_prev = Y[1]
       results.append(max(Y[0]))
-    bar.finish()
     c = Counter(results)
     print('Решение', max(c, key=c.get))
