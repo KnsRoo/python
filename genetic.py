@@ -2,28 +2,23 @@ import numpy as np
 import itertools
 import random
 
-
 def shuffle(matrix):
 	np.random.shuffle(matrix)
-	for i in range(len(matrix)):
-		if checkshift(matrix): shuffle(matrix)
+	if wrong(matrix): shuffle(matrix)
 	return matrix
 
 def mutation(child):
-    while checkshift(child):
+    while wrong(child):
         pos, null = [], []
         for x in range(len(child)):
             if sum(child.T[x]) > 1: pos.append(x)
             if sum(child.T[x]) == 0: null.append(x)
         i = np.where(child.T[pos[0]] == 1)[0][0]
-        child[i, pos[0]] = 0
-        child[i, null[0]] = 1
+        child[i, pos[0]], child[i, null[0]]  = 0,1
     return child
 
-def checkshift(child):
-	for i in range(len(child)):
-		if sum(child[i]) != 1 or sum(child.T[i]) != 1: return True
-	return False
+def wrong(child):
+	return sum([1 if (sum(child[i]) != 1 or sum(child.T[i]) != 1) else 0 for i in range(len(child))])
 
 def random_pos(indexes = []):
     while len(indexes) != 4:
@@ -34,8 +29,7 @@ def random_pos(indexes = []):
 def interval(y, ost = 0):
     P = []
     for i in range(len(y)):
-    	P.append(y[i]/sum(y)*100+ost)
-    	ost = P[i]
+    	P.append(y[i]/sum(y)*100+ost); ost = P[i]
     return P
 
 def cross(dad, mom, child = [], variant = 0):
@@ -44,15 +38,14 @@ def cross(dad, mom, child = [], variant = 0):
 		dad_p, mom_p = np.where(dad[i] == 1)[0][0], np.where(mom[i] == 1)[0][0]
 		j = int(round((dad_p+mom_p)/2)) if variant == 0 else min(dad_p, mom_p + random.randint(0, abs(dad_p-mom_p)))
 		child[i,j] = 1
-	if checkshift(child): mutation(child)
+	if wrong(child): mutation(child)
 	return np.array(child)
 
 def ability(A, population):
     y = [sum((A*item).ravel()) for item in population]
-    y0 = sum(y)/len(y)
-    return (y, y0)
+    return (y, sum(y)/len(y))
 
-def rnd_poses(P, nums= [], k = 0, ):
+def rnd_poses(P, nums= [], k = 0):
     M = list(P)
     P.extend([random.randint(0,99) for i in range(4)])
     for item in sorted(P):
@@ -61,10 +54,8 @@ def rnd_poses(P, nums= [], k = 0, ):
     return nums
 
 def evolution(y, population, var = 0):
-    P = interval(y[0])
-    nums = rnd_poses(P)
-    best = [pop[idx] for idx in nums]
-    best = list(itertools.product(best,best))
+    nums = rnd_poses(interval(y[0]))
+    best = list(itertools.product([pop[idx] for idx in nums],[pop[idx] for idx in nums]))
     newpop = [best[idx] for idx in random_pos()]
     return [cross(*item, variant = var) for item in newpop]
 
