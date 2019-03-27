@@ -2,14 +2,11 @@ import numpy as np, itertools
 from collections import Counter
 
 def shuffle(matrix):
-	np.random.shuffle(matrix)
-	if wrong(matrix): shuffle(matrix)
-	return matrix
+    np.random.shuffle(matrix)
+    return matrix if not wrong(matrix) else shuffle(matrix)
 
-def rand_vector():
-    indexes = [np.random.randint(0,15) for i in range(4)]
-    if len(set(indexes)) < 4: rand_vector()
-    return indexes
+def rand_vector(indexes):
+    return indexes if len(set(indexes)) == 4 else rand_vector([np.random.randint(0,15) for i in range(4)])
 
 def mutation(child, pos = 0, null = 0):
     while wrong(child):
@@ -24,12 +21,11 @@ def wrong(child):
 	return sum([1 if (sum(child[i]) != 1 or sum(child.T[i]) != 1) else 0 for i in range(len(child))])
 
 def cross(dad, mom, child, variant = 0):
-	for i in range(len(dad)):
-		dad_p, mom_p = np.where(dad[i] == 1)[0][0], np.where(mom[i] == 1)[0][0]
-		j = int(round((dad_p+mom_p)/2)) if variant == 0 else min(dad_p, mom_p + np.random.randint(0, abs(dad_p-mom_p)))
-		child[i,j] = 1
-	if wrong(child): mutation(child)
-	return np.array(child)
+    for i in range(len(dad)):
+    	dad_p, mom_p = np.where(dad[i] == 1)[0][0], np.where(mom[i] == 1)[0][0]
+    	j = int(round((dad_p+mom_p)/2)) if variant == 0 else min(dad_p, mom_p + np.random.randint(0, abs(dad_p-mom_p)))
+    	child[i,j] = 1
+    return np.array(child) if not wrong(child) else mutation(child)
 
 def ability(A, pop):
     y = [sum((np.multiply(A,item)).ravel()) for item in pop]
@@ -46,7 +42,7 @@ def rand_poses(P, k = 0):
 def evolution(y, pop, var = 0):
     nums = rand_poses(list(np.cumsum([x/sum(y)*100 for x in y])))
     best = list(itertools.product([pop[idx] for idx in nums], repeat = 2))
-    return [cross(*item, np.zeros((4, 4)), variant = var) for item in [best[idx] for idx in rand_vector()]]
+    return [cross(*item, np.zeros((4, 4)), variant = var) for item in [best[idx] for idx in rand_vector([np.random.randint(0,15) for i in range(4)])]]
 
 if __name__ == "__main__":
     A = np.array([[100, 150, 90, 200],
