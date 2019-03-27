@@ -6,17 +6,19 @@ import random
 def shuffle(matrix):
 	np.random.shuffle(matrix)
 	for i in range(len(matrix)):
-		if sum(matrix[i]) != 1 or sum(matrix.T[i]) != 1: shuffle(matrix)
+		if checkshift(matrix): shuffle(matrix)
 	return matrix
 
 def mutation(child):
-	for i in range(3):
-		for z in range(3):
-			j = np.where(child[i] == 1)[0][0]
-			child[i][j] = 0
-			child[i][(j+z)%4] = 1
-			if not checkshift(child):
-				return child
+    while checkshift(child):
+        pos, null = [], []
+        for x in range(len(child)):
+            if sum(child.T[x]) > 1: pos.append(x)
+            if sum(child.T[x]) == 0: null.append(x)
+        i = np.where(child.T[pos[0]] == 1)[0][0]
+        child[i, pos[0]] = 0
+        child[i, null[0]] = 1
+    return child
 
 def checkshift(child):
 	for i in range(len(child)):
