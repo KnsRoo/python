@@ -6,7 +6,7 @@ def shuffle(matrix) -> 'Генерация начальной популяции
     return matrix if not wrong(matrix) else shuffle(matrix)
 
 def rand_vector(indexes) -> 'Выбор 4 случайных чисел':
-    return indexes if len(set(indexes)) == 4 else rand_vector(list(np.random.randint(0, 15, 4)))
+    return indexes if len(set(indexes)) == 4 else rand_vector(list(np.random.randint(0, len(indexes), 4)))
 
 def mutation(child, pos = 0, null = 0) -> 'Случайная перестановка гена':
     while wrong(child):
@@ -41,8 +41,8 @@ def rand_poses(P: 'Интервал', k = 0) -> 'Проверка попадан
 
 def evolution(y, pop, var = 0) -> 'Шаг развития популяции':
     nums = rand_poses(list(np.cumsum([x/sum(y)*100 for x in y])))
-    best = list(itertools.product([pop[idx] for idx in nums], repeat = 2))
-    return [cross(*item, np.zeros((4, 4)), variant = var) for item in [best[idx] for idx in rand_vector(list(np.random.randint(0, 15, 4)))]]
+    best = list(itertools.combinations_with_replacement([pop[idx] for idx in nums], 2))
+    return [cross(*item, np.zeros((4, 4)), variant = var) for item in [best[idx] for idx in rand_vector(list(np.random.randint(0, len(best), 4)))]]
 
 if __name__ == "__main__":
     A, R = np.array([[100, 150, 90, 200], [200, 100, 70, 150], [250, 80,  70, 100], [190, 100, 120, 200]]), []
